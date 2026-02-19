@@ -16,34 +16,22 @@
  * - 1-3: Switch between timelines
  */
 
-// Detect mobile
+// Detect mobile and orientation
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
     || window.innerWidth < 768;
+const isPortrait = window.innerHeight > window.innerWidth;
 
-// Responsive sizing
-const getGameSize = () => {
-    const maxWidth = Math.min(window.innerWidth, 900);
-    const maxHeight = Math.min(window.innerHeight, 700);
-    const aspectRatio = 900 / 650;
-    
-    let width = maxWidth;
-    let height = width / aspectRatio;
-    
-    if (height > maxHeight) {
-        height = maxHeight;
-        width = height * aspectRatio;
-    }
-    
-    return { width: Math.floor(width), height: Math.floor(height) };
-};
-
-const gameSize = getGameSize();
+// Set canvas size based on orientation
+// Portrait: taller, narrower canvas
+// Landscape: wider canvas (original)
+const canvasWidth = isPortrait ? 400 : 900;
+const canvasHeight = isPortrait ? 700 : 650;
 
 // Game configuration
 const config = {
     type: Phaser.AUTO,
-    width: 900,
-    height: 650,
+    width: canvasWidth,
+    height: canvasHeight,
     parent: 'game-container',
     backgroundColor: '#0a0a12',
     scene: [BootScene, CombatScene],
@@ -57,8 +45,8 @@ const config = {
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 900,
-        height: 650
+        width: canvasWidth,
+        height: canvasHeight
     },
     input: {
         activePointers: 3,  // Support multi-touch

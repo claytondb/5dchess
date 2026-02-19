@@ -13,11 +13,24 @@ class CombatScene extends Phaser.Scene {
         this.selectedShip = null;
         this.temporalJumpMode = false;
         
-        // Arena bounds
-        this.arenaWidth = 700;
-        this.arenaHeight = 500;
-        this.arenaX = 180;
-        this.arenaY = 80;
+        // Detect portrait vs landscape
+        this.isPortrait = this.scale.height > this.scale.width;
+        
+        // Responsive arena bounds
+        if (this.isPortrait) {
+            // Portrait: arena fills width, timeline at top, controls at bottom
+            const padding = 10;
+            this.arenaWidth = this.scale.width - padding * 2;
+            this.arenaHeight = this.scale.height - 180; // Room for top ribbon + bottom controls
+            this.arenaX = padding;
+            this.arenaY = 70; // Below timeline ribbon
+        } else {
+            // Landscape: original layout
+            this.arenaWidth = 700;
+            this.arenaHeight = 500;
+            this.arenaX = 180;
+            this.arenaY = 80;
+        }
         
         // Initialize systems
         this.timelineManager = new TimelineManager(this);
@@ -200,27 +213,44 @@ class CombatScene extends Phaser.Scene {
     }
     
     createTimelineRibbon() {
-        // Timeline ribbon on the left side
-        this.ribbonX = 20;
-        this.ribbonY = this.arenaY;
-        this.ribbonWidth = 140;
-        
-        // Ribbon background
-        this.ribbonBg = this.add.rectangle(
-            this.ribbonX + this.ribbonWidth / 2,
-            this.ribbonY + 100,
-            this.ribbonWidth,
-            200,
-            0x111122, 0.8
-        );
-        this.ribbonBg.setStrokeStyle(1, 0x334455);
-        
-        // Timeline title
-        this.add.text(this.ribbonX + this.ribbonWidth / 2, this.ribbonY + 10, 'TIMELINES', {
-            fontSize: '12px',
-            fontFamily: 'Segoe UI',
-            color: '#667'
-        }).setOrigin(0.5);
+        if (this.isPortrait) {
+            // Portrait: horizontal ribbon at top
+            this.ribbonX = 10;
+            this.ribbonY = 5;
+            this.ribbonHeight = 55;
+            
+            // Ribbon background - full width
+            this.ribbonBg = this.add.rectangle(
+                this.scale.width / 2,
+                this.ribbonY + this.ribbonHeight / 2,
+                this.scale.width - 20,
+                this.ribbonHeight,
+                0x111122, 0.9
+            );
+            this.ribbonBg.setStrokeStyle(1, 0x334455);
+        } else {
+            // Landscape: vertical ribbon on left
+            this.ribbonX = 20;
+            this.ribbonY = this.arenaY;
+            this.ribbonWidth = 140;
+            
+            // Ribbon background
+            this.ribbonBg = this.add.rectangle(
+                this.ribbonX + this.ribbonWidth / 2,
+                this.ribbonY + 100,
+                this.ribbonWidth,
+                200,
+                0x111122, 0.8
+            );
+            this.ribbonBg.setStrokeStyle(1, 0x334455);
+            
+            // Timeline title
+            this.add.text(this.ribbonX + this.ribbonWidth / 2, this.ribbonY + 10, 'TIMELINES', {
+                fontSize: '12px',
+                fontFamily: 'Segoe UI',
+                color: '#667'
+            }).setOrigin(0.5);
+        }
         
         // Timeline entries container
         this.timelineEntries = [];
@@ -236,56 +266,110 @@ class CombatScene extends Phaser.Scene {
         
         const timelines = this.timelineManager.getTimelineStatus();
         
-        for (let i = 0; i < timelines.length; i++) {
-            const t = timelines[i];
-            const y = this.ribbonY + 35 + i * 55;
+        if (this.isPortrait) {
+            // Portrait: horizontal timeline buttons
+            const buttonWidth = (this.scale.width - 40) / 3;
             
-            // Entry background
-            const bg = this.add.rectangle(
-                this.ribbonX + this.ribbonWidth / 2,
-                y + 15,
-                this.ribbonWidth - 10,
-                45,
-                t.isActive ? 0x223344 : 0x1a1a2e,
-                0.8
-            );
-            bg.setStrokeStyle(2, t.isActive ? t.color : 0x333333);
-            bg.setInteractive({ useHandCursor: true });
-            bg.on('pointerdown', () => this.switchToTimeline(i));
-            this.timelineEntries.push(bg);
-            
-            // Timeline name
-            const name = this.add.text(this.ribbonX + 15, y + 5, `Timeline ${t.name}`, {
-                fontSize: '13px',
-                fontFamily: 'Segoe UI',
-                color: t.isActive ? '#ffffff' : '#888888'
-            });
-            this.timelineEntries.push(name);
-            
-            // Status indicator
-            const statusColor = t.health > 75 ? 0x44ff44 : (t.health > 25 ? 0xffff44 : 0xff4444);
-            const status = this.add.circle(this.ribbonX + this.ribbonWidth - 20, y + 12, 6, statusColor);
-            this.timelineEntries.push(status);
-            
-            // Ship count
-            const ships = this.combatSystem.getShipsInTimeline(i);
-            const playerCount = ships.filter(s => s.isPlayer && s.health > 0).length;
-            const enemyCount = ships.filter(s => !s.isPlayer && s.health > 0).length;
-            
-            const countText = this.add.text(this.ribbonX + 15, y + 23, `⬢${playerCount} vs ⬡${enemyCount}`, {
-                fontSize: '11px',
-                fontFamily: 'Segoe UI',
-                color: '#667'
-            });
-            this.timelineEntries.push(countText);
-            
-            // Active indicator
-            if (t.isActive) {
-                const activeMarker = this.add.text(this.ribbonX + this.ribbonWidth - 35, y + 23, '◀', {
+            for (let i = 0; i < timelines.length; i++) {
+                const t = timelines[i];
+                const x = 20 + i * buttonWidth + buttonWidth / 2;
+                const y = this.ribbonY + this.ribbonHeight / 2;
+                
+                // Entry background
+                const bg = this.add.rectangle(
+                    x, y,
+                    buttonWidth - 8,
+                    40,
+                    t.isActive ? 0x223344 : 0x1a1a2e,
+                    0.9
+                );
+                bg.setStrokeStyle(2, t.isActive ? t.color : 0x333333);
+                bg.setInteractive({ useHandCursor: true });
+                bg.on('pointerdown', () => this.switchToTimeline(i));
+                this.timelineEntries.push(bg);
+                
+                // Timeline name + status
+                const ships = this.combatSystem.getShipsInTimeline(i);
+                const playerCount = ships.filter(s => s.isPlayer && s.health > 0).length;
+                const enemyCount = ships.filter(s => !s.isPlayer && s.health > 0).length;
+                
+                const label = this.add.text(x, y - 8, `TL ${t.name}`, {
+                    fontSize: '12px',
+                    fontFamily: 'Segoe UI',
+                    fontStyle: 'bold',
+                    color: t.isActive ? '#ffffff' : '#888888'
+                }).setOrigin(0.5);
+                this.timelineEntries.push(label);
+                
+                const count = this.add.text(x, y + 8, `⬢${playerCount} vs ⬡${enemyCount}`, {
                     fontSize: '10px',
-                    color: '#4488ff'
+                    fontFamily: 'Segoe UI',
+                    color: '#667'
+                }).setOrigin(0.5);
+                this.timelineEntries.push(count);
+                
+                // Active indicator
+                if (t.isActive) {
+                    const marker = this.add.text(x + buttonWidth/2 - 15, y, '◀', {
+                        fontSize: '10px',
+                        color: '#4488ff'
+                    }).setOrigin(0.5);
+                    this.timelineEntries.push(marker);
+                }
+            }
+        } else {
+            // Landscape: original vertical layout
+            for (let i = 0; i < timelines.length; i++) {
+                const t = timelines[i];
+                const y = this.ribbonY + 35 + i * 55;
+                
+                // Entry background
+                const bg = this.add.rectangle(
+                    this.ribbonX + this.ribbonWidth / 2,
+                    y + 15,
+                    this.ribbonWidth - 10,
+                    45,
+                    t.isActive ? 0x223344 : 0x1a1a2e,
+                    0.8
+                );
+                bg.setStrokeStyle(2, t.isActive ? t.color : 0x333333);
+                bg.setInteractive({ useHandCursor: true });
+                bg.on('pointerdown', () => this.switchToTimeline(i));
+                this.timelineEntries.push(bg);
+                
+                // Timeline name
+                const name = this.add.text(this.ribbonX + 15, y + 5, `Timeline ${t.name}`, {
+                    fontSize: '13px',
+                    fontFamily: 'Segoe UI',
+                    color: t.isActive ? '#ffffff' : '#888888'
                 });
-                this.timelineEntries.push(activeMarker);
+                this.timelineEntries.push(name);
+                
+                // Status indicator
+                const statusColor = t.health > 75 ? 0x44ff44 : (t.health > 25 ? 0xffff44 : 0xff4444);
+                const status = this.add.circle(this.ribbonX + this.ribbonWidth - 20, y + 12, 6, statusColor);
+                this.timelineEntries.push(status);
+                
+                // Ship count
+                const ships = this.combatSystem.getShipsInTimeline(i);
+                const playerCount = ships.filter(s => s.isPlayer && s.health > 0).length;
+                const enemyCount = ships.filter(s => !s.isPlayer && s.health > 0).length;
+                
+                const countText = this.add.text(this.ribbonX + 15, y + 23, `⬢${playerCount} vs ⬡${enemyCount}`, {
+                    fontSize: '11px',
+                    fontFamily: 'Segoe UI',
+                    color: '#667'
+                });
+                this.timelineEntries.push(countText);
+                
+                // Active indicator
+                if (t.isActive) {
+                    const activeMarker = this.add.text(this.ribbonX + this.ribbonWidth - 35, y + 23, '◀', {
+                        fontSize: '10px',
+                        color: '#4488ff'
+                    });
+                    this.timelineEntries.push(activeMarker);
+                }
             }
         }
     }
@@ -421,8 +505,8 @@ class CombatScene extends Phaser.Scene {
         this.touchControls.add(barBg);
         
         // Button style helper
-        const createButton = (x, label, color, callback) => {
-            const btn = this.add.rectangle(x, 30, 70, 45, color, 0.8);
+        const createButton = (x, label, color, callback, width = 70) => {
+            const btn = this.add.rectangle(x, 30, width, 45, color, 0.8);
             btn.setStrokeStyle(2, Phaser.Display.Color.GetColor(
                 Phaser.Display.Color.IntegerToRGB(color).r + 40,
                 Phaser.Display.Color.IntegerToRGB(color).g + 40,
@@ -435,7 +519,7 @@ class CombatScene extends Phaser.Scene {
             this.touchControls.add(btn);
             
             const text = this.add.text(x, 30, label, {
-                fontSize: '12px',
+                fontSize: this.isPortrait ? '11px' : '12px',
                 fontFamily: 'Segoe UI',
                 color: '#ffffff',
                 fontStyle: 'bold'
@@ -445,23 +529,43 @@ class CombatScene extends Phaser.Scene {
             return { btn, text };
         };
         
-        // Pause button
-        this.pauseBtn = createButton(50, '⏸ PAUSE', 0x444444, () => this.togglePause());
-        
-        // Timeline buttons
-        createButton(140, 'TL 1', 0x3366cc, () => this.switchToTimeline(0));
-        createButton(220, 'TL 2', 0x33cc66, () => this.switchToTimeline(1));
-        createButton(300, 'TL 3', 0xcc6633, () => this.switchToTimeline(2));
-        
-        // Temporal Jump button
-        this.jumpBtn = createButton(this.scale.width - 90, '⚡ JUMP', 0x00aaaa, () => {
-            if (this.isPaused && this.selectedShip && this.selectedShip.isPlayer) {
-                this.initiateTemporalJump();
-            }
-        });
-        
-        // Restart button (smaller, far right)
-        createButton(this.scale.width - 30, '↻', 0x662222, () => this.scene.restart());
+        if (this.isPortrait) {
+            // Portrait: simplified bottom bar (timelines are at top)
+            const btnWidth = (this.scale.width - 30) / 3;
+            
+            // Pause button (left)
+            this.pauseBtn = createButton(15 + btnWidth/2, '⏸ PAUSE', 0x444444, () => this.togglePause(), btnWidth - 5);
+            
+            // Jump button (center)
+            this.jumpBtn = createButton(this.scale.width/2, '⚡ JUMP', 0x00aaaa, () => {
+                if (this.isPaused && this.selectedShip && this.selectedShip.isPlayer) {
+                    this.initiateTemporalJump();
+                }
+            }, btnWidth - 5);
+            
+            // Restart button (right)
+            createButton(this.scale.width - 15 - btnWidth/2, '↻ RESTART', 0x662222, () => this.scene.restart(), btnWidth - 5);
+            
+        } else {
+            // Landscape: full control bar
+            // Pause button
+            this.pauseBtn = createButton(50, '⏸ PAUSE', 0x444444, () => this.togglePause());
+            
+            // Timeline buttons
+            createButton(140, 'TL 1', 0x3366cc, () => this.switchToTimeline(0));
+            createButton(220, 'TL 2', 0x33cc66, () => this.switchToTimeline(1));
+            createButton(300, 'TL 3', 0xcc6633, () => this.switchToTimeline(2));
+            
+            // Temporal Jump button
+            this.jumpBtn = createButton(this.scale.width - 90, '⚡ JUMP', 0x00aaaa, () => {
+                if (this.isPaused && this.selectedShip && this.selectedShip.isPlayer) {
+                    this.initiateTemporalJump();
+                }
+            });
+            
+            // Restart button (smaller, far right)
+            createButton(this.scale.width - 30, '↻', 0x662222, () => this.scene.restart());
+        }
         
         // Add hint text for touch
         this.touchHint = this.add.text(this.scale.width / 2, 8, 'Tap = Select  •  Double-tap = Order', {
