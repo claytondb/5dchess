@@ -60,48 +60,174 @@ class CombatScene extends Phaser.Scene {
     }
     
     createBackground() {
-        // Starfield background
-        const graphics = this.add.graphics();
-        graphics.fillStyle(0x0a0a1a, 1);
-        graphics.fillRect(0, 0, this.scale.width, this.scale.height);
+        // Deep space gradient background
+        const bgGraphics = this.add.graphics();
+        bgGraphics.setDepth(-10);
         
-        // Stars
-        for (let i = 0; i < 200; i++) {
+        // Create gradient effect with multiple layers
+        const colors = [0x050510, 0x0a0a20, 0x0d0d28, 0x080818];
+        const height = this.scale.height / colors.length;
+        colors.forEach((color, i) => {
+            bgGraphics.fillStyle(color, 1);
+            bgGraphics.fillRect(0, i * height, this.scale.width, height + 1);
+        });
+        
+        // Nebula clouds (atmospheric effect)
+        this.nebulaClouds = [];
+        const nebulaColors = [0x2a1040, 0x102040, 0x1a2050, 0x301030];
+        for (let i = 0; i < 5; i++) {
+            const cloud = this.add.graphics();
+            cloud.setDepth(-8);
+            const color = Phaser.Utils.Array.GetRandom(nebulaColors);
             const x = Phaser.Math.Between(0, this.scale.width);
             const y = Phaser.Math.Between(0, this.scale.height);
-            const size = Phaser.Math.FloatBetween(0.5, 2);
-            const alpha = Phaser.Math.FloatBetween(0.2, 0.8);
+            const size = Phaser.Math.Between(100, 300);
             
-            graphics.fillStyle(0xffffff, alpha);
-            graphics.fillCircle(x, y, size);
+            // Soft gradient circle for nebula effect
+            for (let r = size; r > 0; r -= 10) {
+                const alpha = (r / size) * 0.15;
+                cloud.fillStyle(color, alpha);
+                cloud.fillCircle(x, y, r);
+            }
+            this.nebulaClouds.push({ graphics: cloud, x, y, speed: 0.1 + Math.random() * 0.2 });
+        }
+        
+        // Distant stars (small, static)
+        const starsGraphics = this.add.graphics();
+        starsGraphics.setDepth(-7);
+        for (let i = 0; i < 150; i++) {
+            const x = Phaser.Math.Between(0, this.scale.width);
+            const y = Phaser.Math.Between(0, this.scale.height);
+            const size = Phaser.Math.FloatBetween(0.3, 1);
+            const alpha = Phaser.Math.FloatBetween(0.2, 0.5);
+            starsGraphics.fillStyle(0xffffff, alpha);
+            starsGraphics.fillCircle(x, y, size);
+        }
+        
+        // Bright stars (with glow, animated twinkle)
+        this.stars = [];
+        for (let i = 0; i < 30; i++) {
+            const x = Phaser.Math.Between(0, this.scale.width);
+            const y = Phaser.Math.Between(0, this.scale.height);
+            const baseSize = Phaser.Math.FloatBetween(1, 2.5);
+            const color = Phaser.Utils.Array.GetRandom([0xffffff, 0xaaccff, 0xffffaa, 0xffaaaa]);
+            
+            const star = this.add.graphics();
+            star.setDepth(-6);
+            this.stars.push({ 
+                graphics: star, 
+                x, y, 
+                baseSize, 
+                color,
+                phase: Math.random() * Math.PI * 2,
+                speed: 0.5 + Math.random() * 1.5
+            });
+        }
+        
+        // Distant galaxies/clusters
+        for (let i = 0; i < 3; i++) {
+            const galaxy = this.add.graphics();
+            galaxy.setDepth(-9);
+            const x = Phaser.Math.Between(50, this.scale.width - 50);
+            const y = Phaser.Math.Between(50, this.scale.height - 50);
+            
+            // Spiral galaxy effect
+            for (let j = 0; j < 50; j++) {
+                const angle = j * 0.3;
+                const radius = j * 1.5;
+                const px = x + Math.cos(angle) * radius;
+                const py = y + Math.sin(angle) * radius * 0.5;
+                const alpha = 0.3 - (j / 50) * 0.25;
+                galaxy.fillStyle(0x8888ff, alpha);
+                galaxy.fillCircle(px, py, 1 + Math.random());
+            }
         }
     }
     
     createArena() {
-        // Combat arena border
-        const arena = this.add.rectangle(
-            this.arenaX + this.arenaWidth / 2,
-            this.arenaY + this.arenaHeight / 2,
-            this.arenaWidth,
-            this.arenaHeight,
-            0x111122, 0.5
-        );
-        arena.setStrokeStyle(2, 0x334455);
+        // Combat arena with holographic effect
+        const centerX = this.arenaX + this.arenaWidth / 2;
+        const centerY = this.arenaY + this.arenaHeight / 2;
         
-        // Grid lines
+        // Arena background with gradient
+        const arenaBg = this.add.graphics();
+        arenaBg.setDepth(-5);
+        
+        // Dark center, lighter edges (vignette inverse)
+        arenaBg.fillStyle(0x0a0a18, 0.8);
+        arenaBg.fillRect(this.arenaX, this.arenaY, this.arenaWidth, this.arenaHeight);
+        
+        // Corner accents
+        const cornerSize = 30;
+        const cornerGraphics = this.add.graphics();
+        cornerGraphics.setDepth(-4);
+        cornerGraphics.lineStyle(2, 0x3366aa, 0.6);
+        
+        // Top-left
+        cornerGraphics.moveTo(this.arenaX, this.arenaY + cornerSize);
+        cornerGraphics.lineTo(this.arenaX, this.arenaY);
+        cornerGraphics.lineTo(this.arenaX + cornerSize, this.arenaY);
+        
+        // Top-right
+        cornerGraphics.moveTo(this.arenaX + this.arenaWidth - cornerSize, this.arenaY);
+        cornerGraphics.lineTo(this.arenaX + this.arenaWidth, this.arenaY);
+        cornerGraphics.lineTo(this.arenaX + this.arenaWidth, this.arenaY + cornerSize);
+        
+        // Bottom-left
+        cornerGraphics.moveTo(this.arenaX, this.arenaY + this.arenaHeight - cornerSize);
+        cornerGraphics.lineTo(this.arenaX, this.arenaY + this.arenaHeight);
+        cornerGraphics.lineTo(this.arenaX + cornerSize, this.arenaY + this.arenaHeight);
+        
+        // Bottom-right
+        cornerGraphics.moveTo(this.arenaX + this.arenaWidth - cornerSize, this.arenaY + this.arenaHeight);
+        cornerGraphics.lineTo(this.arenaX + this.arenaWidth, this.arenaY + this.arenaHeight);
+        cornerGraphics.lineTo(this.arenaX + this.arenaWidth, this.arenaY + this.arenaHeight - cornerSize);
+        
+        cornerGraphics.strokePath();
+        
+        // Glowing border
+        const border = this.add.graphics();
+        border.setDepth(-4);
+        border.lineStyle(1, 0x2244aa, 0.4);
+        border.strokeRect(this.arenaX, this.arenaY, this.arenaWidth, this.arenaHeight);
+        border.lineStyle(2, 0x4466cc, 0.2);
+        border.strokeRect(this.arenaX - 2, this.arenaY - 2, this.arenaWidth + 4, this.arenaHeight + 4);
+        
+        // Holographic grid with gradient alpha
         const grid = this.add.graphics();
-        grid.lineStyle(1, 0x222233, 0.3);
+        grid.setDepth(-4);
+        const gridSize = this.isPortrait ? 40 : 50;
         
-        const gridSize = 50;
-        for (let x = this.arenaX; x <= this.arenaX + this.arenaWidth; x += gridSize) {
-            grid.moveTo(x, this.arenaY);
-            grid.lineTo(x, this.arenaY + this.arenaHeight);
-        }
+        // Horizontal lines
         for (let y = this.arenaY; y <= this.arenaY + this.arenaHeight; y += gridSize) {
+            const distFromCenter = Math.abs(y - centerY) / (this.arenaHeight / 2);
+            const alpha = 0.15 - distFromCenter * 0.1;
+            grid.lineStyle(1, 0x334488, Math.max(0.05, alpha));
             grid.moveTo(this.arenaX, y);
             grid.lineTo(this.arenaX + this.arenaWidth, y);
         }
+        
+        // Vertical lines  
+        for (let x = this.arenaX; x <= this.arenaX + this.arenaWidth; x += gridSize) {
+            const distFromCenter = Math.abs(x - centerX) / (this.arenaWidth / 2);
+            const alpha = 0.15 - distFromCenter * 0.1;
+            grid.lineStyle(1, 0x334488, Math.max(0.05, alpha));
+            grid.moveTo(x, this.arenaY);
+            grid.lineTo(x, this.arenaY + this.arenaHeight);
+        }
         grid.strokePath();
+        
+        // Center crosshair
+        const crosshair = this.add.graphics();
+        crosshair.setDepth(-3);
+        crosshair.lineStyle(1, 0x4488cc, 0.3);
+        crosshair.moveTo(centerX - 20, centerY);
+        crosshair.lineTo(centerX + 20, centerY);
+        crosshair.moveTo(centerX, centerY - 20);
+        crosshair.lineTo(centerX, centerY + 20);
+        crosshair.strokePath();
+        crosshair.lineStyle(1, 0x4488cc, 0.2);
+        crosshair.strokeCircle(centerX, centerY, 40);
     }
     
     createUI() {
@@ -979,12 +1105,50 @@ class CombatScene extends Phaser.Scene {
             this.aiSystem.update(time, delta);
         }
         
+        // Animate background stars (always, even when paused)
+        this.updateBackground(time, delta);
+        
         // Always update UI
         this.updateUI();
         
         // Periodically update timeline ribbon
         if (Math.floor(time / 500) !== Math.floor((time - delta) / 500)) {
             this.updateTimelineRibbon();
+        }
+    }
+    
+    updateBackground(time, delta) {
+        // Animate twinkling stars
+        if (this.stars) {
+            for (const star of this.stars) {
+                star.phase += delta * 0.001 * star.speed;
+                const twinkle = 0.5 + Math.sin(star.phase) * 0.5;
+                const size = star.baseSize * (0.8 + twinkle * 0.4);
+                
+                star.graphics.clear();
+                
+                // Glow
+                star.graphics.fillStyle(star.color, twinkle * 0.3);
+                star.graphics.fillCircle(star.x, star.y, size * 2);
+                
+                // Core
+                star.graphics.fillStyle(star.color, 0.6 + twinkle * 0.4);
+                star.graphics.fillCircle(star.x, star.y, size);
+                
+                // Bright center
+                star.graphics.fillStyle(0xffffff, twinkle * 0.8);
+                star.graphics.fillCircle(star.x, star.y, size * 0.4);
+            }
+        }
+        
+        // Slowly drift nebula clouds
+        if (this.nebulaClouds && !this.isPaused) {
+            for (const cloud of this.nebulaClouds) {
+                cloud.x += cloud.speed * delta * 0.01;
+                if (cloud.x > this.scale.width + 150) {
+                    cloud.x = -150;
+                }
+            }
         }
     }
 }
