@@ -34,7 +34,7 @@ const config = {
     height: canvasHeight,
     parent: 'game-container',
     backgroundColor: '#0a0a12',
-    scene: [BootScene, CombatScene],
+    scene: [BootScene, MenuScene, TutorialScene, CombatScene],
     physics: {
         default: 'arcade',
         arcade: {

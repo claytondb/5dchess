@@ -49,7 +49,7 @@ class BootScene extends Phaser.Scene {
                 onComplete: () => {
                     loadingText.setText('READY');
                     this.time.delayedCall(300, () => {
-                        this.scene.start('CombatScene');
+                        this.scene.start('MenuScene');
                     });
                 }
             });
