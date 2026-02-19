@@ -1,0 +1,19 @@
+{
+  "name": "5d-chess-multiverse-tactics",
+  "version": "0.1.0",
+  "description": "5D Chess: Multiverse Tactics - MVP Prototype",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -c-1",
+    "dev": "npx http-server . -p 8080 -c-1 -o"
+  },
+  "keywords": ["game", "phaser", "5d-chess", "temporal"],
+  "author": "DC-5DChess Team",
+  "license": "MIT",
+  "dependencies": {
+    "phaser": "^3.70.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

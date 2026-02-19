@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5D Chess: Multiverse Tactics - MVP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a12;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+        }
+        #instructions {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #667;
+            font-size: 12px;
+            text-align: center;
+            pointer-events: none;
+        }
+        #instructions kbd {
+            background: #1a1a2e;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    <div id="instructions">
+        <kbd>SPACE</kbd> Pause/Unpause &nbsp;|&nbsp;
+        <kbd>Click</kbd> Select Ship &nbsp;|&nbsp;
+        <kbd>Right-Click</kbd> Move/Attack &nbsp;|&nbsp;
+        <kbd>T</kbd> Temporal Jump &nbsp;|&nbsp;
+        <kbd>1-3</kbd> Switch Timeline
+    </div>
+    
+    <!-- Load Phaser from CDN for simplicity -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    
+    <!-- Game modules -->
+    <script src="systems/TimelineManager.js"></script>
+    <script src="systems/CombatSystem.js"></script>
+    <script src="systems/AISystem.js"></script>
+    <script src="entities/Ship.js"></script>
+    <script src="scenes/BootScene.js"></script>
+    <script src="scenes/CombatScene.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

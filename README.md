@@ -1,41 +1,51 @@
 # 5D Chess: Multiverse Tactics
 
-> "FTL: Faster Than Light" meets "5D Chess with Multiverse Time Travel"
+**"FTL meets 5D Chess"** — Command a fleet across branching timelines in real-time tactical combat.
 
-A real-time tactical spaceship combat game where you command a fleet across time and parallel universes. Send ships back in time to change the outcome of battles, but beware—your enemy can do the same.
+![Status](https://img.shields.io/badge/status-MVP%20Prototype-blue)
+![Platform](https://img.shields.io/badge/platform-Web%20Browser-green)
 
-## Core Concept
+## 🎮 Play Now
 
-Imagine FTL's tense ship-to-ship combat, but with the mind-bending time travel mechanics of 5D Chess:
+1. Open `src/index.html` in your browser
+2. Or run `npm start` and visit http://localhost:8080
 
-- **Real-time combat** with pause-to-plan (like FTL)
-- **Time travel**: Send ships or commands back to earlier moments
-- **Branching timelines**: Every time-jump creates a new parallel universe
-- **Multiverse management**: Track and influence multiple simultaneous timelines
-- **Victory condition**: Destroy the enemy flagship across ALL active timelines
+## 🕹️ Quick Controls
 
-## Inspiration
+- **SPACE** - Pause/Unpause
+- **Click** - Select ship
+- **Right-Click** - Move/Attack order
+- **T** - Temporal Jump (creates new timeline)
+- **1-3** - Switch timelines
 
-- **5D Chess with Multiverse Time Travel** - Chess where pieces move through time and timelines
-- **FTL: Faster Than Light** - Roguelike spaceship management with real-time combat
-- **5D Diplomacy** - Multiplayer Diplomacy with time travel (see: youtube.com/watch?v=7fjwXLBJTLY)
+## ⏱️ Core Concept
 
-## Project Status
+You are a **Temporal Fleet Commander** who perceives time non-linearly. When things go badly, you can send ships backward in time, creating new timeline branches where different outcomes are possible.
 
-🚧 **In Development** - Sub-agents working on:
-- [ ] Requirements Definition
-- [ ] Product Design  
-- [ ] UX Design
-- [ ] Development
-- [ ] QA Testing
+**The Twist:** You must win in ALL timelines. Creating branches gives you more chances, but also more battles to manage simultaneously.
 
-## Tech Stack (TBD)
+## 🎯 MVP Features
 
-- Web-based (playable in browser)
-- Phaser 3 or PixiJS for rendering
-- TypeScript
-- Real-time or turn-based hybrid combat
+- Real-time pausable combat
+- 2 ship types (Fighter, Cruiser flagship)
+- Temporal jumps create timeline branches
+- Up to 3 concurrent timelines
+- Basic AI opponent
+- Victory requires destroying enemy flagship in all timelines
+
+## 📚 Documentation
+
+- [REQUIREMENTS.md](REQUIREMENTS.md) - Full game requirements
+- [GDD.md](GDD.md) - Game Design Document
+- [UX_DESIGN.md](UX_DESIGN.md) - UI/UX specifications
+- [BUILD.md](BUILD.md) - Build instructions & controls
+
+## 🛠️ Tech Stack
+
+- Phaser 3 (game framework)
+- Vanilla JavaScript
+- HTML5 Canvas
 
 ---
 
-*"The enemy's gate is down... in timeline 7."*
+*"The future is already written. Your job is to write it better."*
