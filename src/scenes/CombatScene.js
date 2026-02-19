@@ -345,6 +345,10 @@ class CombatScene extends Phaser.Scene {
     }
     
     setupInput() {
+        // Detect if mobile
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || this.scale.width < 768;
+        
         // Pause toggle (Space)
         this.input.keyboard.on('keydown-SPACE', () => {
             this.togglePause();
@@ -362,19 +366,110 @@ class CombatScene extends Phaser.Scene {
             }
         });
         
-        // Left click - select ship
+        // Restart (R)
+        this.input.keyboard.on('keydown-R', () => {
+            this.scene.restart();
+        });
+        
+        // Track double-tap for mobile orders
+        this.lastTapTime = 0;
+        this.doubleTapDelay = 300;
+        
+        // Unified pointer handling (works for mouse and touch)
         this.input.on('pointerdown', (pointer) => {
-            if (pointer.leftButtonDown()) {
+            // Ignore if clicking on mobile controls
+            if (this.touchControls && pointer.y > this.scale.height - 70) {
+                return;
+            }
+            
+            // Desktop: right-click for orders
+            if (pointer.rightButtonDown() && this.selectedShip && this.selectedShip.isPlayer) {
+                this.handleOrder(pointer);
+                return;
+            }
+            
+            // Mobile/Touch: double-tap for orders
+            const currentTime = Date.now();
+            const timeSinceLastTap = currentTime - this.lastTapTime;
+            
+            if (timeSinceLastTap < this.doubleTapDelay && this.selectedShip && this.selectedShip.isPlayer) {
+                // Double tap = order
+                this.handleOrder(pointer);
+                this.lastTapTime = 0; // Reset to prevent triple-tap
+            } else {
+                // Single tap = select
                 this.handleSelection(pointer);
+                this.lastTapTime = currentTime;
             }
         });
         
-        // Right click - move/attack order
-        this.input.on('pointerdown', (pointer) => {
-            if (pointer.rightButtonDown() && this.selectedShip && this.selectedShip.isPlayer) {
-                this.handleOrder(pointer);
+        // Create mobile touch controls
+        this.createTouchControls();
+    }
+    
+    createTouchControls() {
+        // Mobile touch control bar at bottom
+        this.touchControls = this.add.container(0, this.scale.height - 60);
+        
+        // Background bar
+        const barBg = this.add.rectangle(
+            this.scale.width / 2, 30,
+            this.scale.width, 60,
+            0x0a0a1a, 0.95
+        );
+        barBg.setStrokeStyle(1, 0x334455);
+        this.touchControls.add(barBg);
+        
+        // Button style helper
+        const createButton = (x, label, color, callback) => {
+            const btn = this.add.rectangle(x, 30, 70, 45, color, 0.8);
+            btn.setStrokeStyle(2, Phaser.Display.Color.GetColor(
+                Phaser.Display.Color.IntegerToRGB(color).r + 40,
+                Phaser.Display.Color.IntegerToRGB(color).g + 40,
+                Phaser.Display.Color.IntegerToRGB(color).b + 40
+            ));
+            btn.setInteractive({ useHandCursor: true });
+            btn.on('pointerdown', callback);
+            btn.on('pointerover', () => btn.setAlpha(1));
+            btn.on('pointerout', () => btn.setAlpha(0.8));
+            this.touchControls.add(btn);
+            
+            const text = this.add.text(x, 30, label, {
+                fontSize: '12px',
+                fontFamily: 'Segoe UI',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            this.touchControls.add(text);
+            
+            return { btn, text };
+        };
+        
+        // Pause button
+        this.pauseBtn = createButton(50, '⏸ PAUSE', 0x444444, () => this.togglePause());
+        
+        // Timeline buttons
+        createButton(140, 'TL 1', 0x3366cc, () => this.switchToTimeline(0));
+        createButton(220, 'TL 2', 0x33cc66, () => this.switchToTimeline(1));
+        createButton(300, 'TL 3', 0xcc6633, () => this.switchToTimeline(2));
+        
+        // Temporal Jump button
+        this.jumpBtn = createButton(this.scale.width - 90, '⚡ JUMP', 0x00aaaa, () => {
+            if (this.isPaused && this.selectedShip && this.selectedShip.isPlayer) {
+                this.initiateTemporalJump();
             }
         });
+        
+        // Restart button (smaller, far right)
+        createButton(this.scale.width - 30, '↻', 0x662222, () => this.scene.restart());
+        
+        // Add hint text for touch
+        this.touchHint = this.add.text(this.scale.width / 2, 8, 'Tap = Select  •  Double-tap = Order', {
+            fontSize: '10px',
+            fontFamily: 'Segoe UI',
+            color: '#556'
+        }).setOrigin(0.5);
+        this.touchControls.add(this.touchHint);
     }
     
     setupEventListeners() {
@@ -470,6 +565,11 @@ class CombatScene extends Phaser.Scene {
         this.isPaused = !this.isPaused;
         this.pauseText.setVisible(this.isPaused);
         this.temporalPanel.setVisible(this.isPaused);
+        
+        // Update mobile pause button text
+        if (this.pauseBtn && this.pauseBtn.text) {
+            this.pauseBtn.text.setText(this.isPaused ? '▶ PLAY' : '⏸ PAUSE');
+        }
         
         if (this.isPaused) {
             // Dim the arena

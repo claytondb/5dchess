@@ -16,6 +16,29 @@
  * - 1-3: Switch between timelines
  */
 
+// Detect mobile
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+    || window.innerWidth < 768;
+
+// Responsive sizing
+const getGameSize = () => {
+    const maxWidth = Math.min(window.innerWidth, 900);
+    const maxHeight = Math.min(window.innerHeight, 700);
+    const aspectRatio = 900 / 650;
+    
+    let width = maxWidth;
+    let height = width / aspectRatio;
+    
+    if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
+    }
+    
+    return { width: Math.floor(width), height: Math.floor(height) };
+};
+
+const gameSize = getGameSize();
+
 // Game configuration
 const config = {
     type: Phaser.AUTO,
@@ -29,6 +52,18 @@ const config = {
         arcade: {
             gravity: { y: 0 },
             debug: false
+        }
+    },
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 900,
+        height: 650
+    },
+    input: {
+        activePointers: 3,  // Support multi-touch
+        touch: {
+            capture: true
         }
     },
     render: {

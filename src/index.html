@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>5D Chess: Multiverse Tactics - MVP</title>
     <style>
         * {
@@ -10,17 +12,21 @@
             padding: 0;
             box-sizing: border-box;
         }
-        body {
+        html, body {
             background: #0a0a12;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             font-family: 'Segoe UI', system-ui, sans-serif;
             overflow: hidden;
+            touch-action: none;
         }
         #game-container {
             position: relative;
+            max-width: 100vw;
+            max-height: 100vh;
         }
         #instructions {
             position: fixed;
@@ -37,6 +43,12 @@
             padding: 2px 6px;
             border-radius: 3px;
             border: 1px solid #333;
+        }
+        /* Hide desktop instructions on mobile */
+        @media (max-width: 768px), (pointer: coarse) {
+            #instructions {
+                display: none;
+            }
         }
     </style>
 </head>
