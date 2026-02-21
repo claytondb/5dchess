@@ -1,0 +1,35 @@
+{
+  "name": "5D Chess: Multiverse Tactics",
+  "short_name": "5D Chess",
+  "description": "Command a fleet across branching timelines in real-time tactical combat",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#050510",
+  "theme_color": "#0a0a20",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "strategy"],
+  "screenshots": [
+    {
+      "src": "/screenshot-gameplay.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "label": "Multiverse tactical combat"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
