@@ -7,7 +7,10 @@
 
 ## 🎮 Play Now
 
-1. Open `src/index.html` in your browser
+**▶️ [Play Online](https://claytondb.github.io/5dchess/)**
+
+Or run locally:
+1. Open `index.html` in your browser
 2. Or run `npm start` and visit http://localhost:8080
 
 ## 🕹️ Quick Controls
